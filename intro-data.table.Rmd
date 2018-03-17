@@ -1,0 +1,16 @@
+---
+title: "intro-data.table"
+author: "Becca Freese"
+date: "3/16/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+##Introduction
+This is a basic overview of the data.table package in R.
+
+![Caption for the picture.](images/becca.png)
