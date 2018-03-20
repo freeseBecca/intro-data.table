@@ -1,37 +1,25 @@
-## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/freeseBecca/intro-data.table/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+##Introduction
+This is a basic overview of the data.table package in R. My goal is to intruduce you to what data.table has to offer. This is not a comparison with dylyr, you can google that stuff if you want.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Authored by Matt Dowle and Arun Srinivasan, first introdued in 2006, to be quicker and more efficient than other methods.
 
-### Markdown
+##Getting Started
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+![](images/structure.png)
 
-```markdown
-Syntax highlighted code block
+<br>
 
-# Header 1
-## Header 2
-### Header 3
+```{r}
+library(data.table)
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+DT <- data.table(x = 1:5,
+                 y = c("a", "b", "a", "b", "c"),
+                 z = c(42, 23, 35, 64, 23))
+str(DT)
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
-### Jekyll Themes
+##Other Resources
+Check out the [Github page](https://github.com/Rdatatable/data.table/wiki) for lots of more information.
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/freeseBecca/intro-data.table/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
