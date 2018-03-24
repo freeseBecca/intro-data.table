@@ -47,28 +47,16 @@ flights
 
 ####Using a data.table
 The overarching concept of data.table is “i, j, by.”
-```{r fig.width=12, fig.height=10,echo=FALSE}
-library(png)
-library(grid)
-img <- readPNG("images/structure.png")
-grid.raster(img)
-```
+<img src="images/structure.png" height="800px" width="1000px" />
 
-```{r fig.width=12, fig.height=4,echo=FALSE}
-img <- readPNG("images/i.png")
-grid.raster(img)
-```
-
+<img src="images/i.png" height="800px" width="1000px" />
 ```{r, message = FALSE, warning = FALSE, error = FALSE}
 flights[carrier == "AA" & origin == "JFK"] #print all flights with AA and had origin of JFK
 ggplot(flights[carrier == "AA"], aes(x = distance)) + geom_histogram() + theme_bw()
 ```
 
 
-```{r fig.width=12, fig.height=4,echo=FALSE}
-img <- readPNG("images/j.png")
-grid.raster(img)
-```
+<img src="images/j.png" height="800px" width="1000px" />
 This is where things get more interesting.
 
 #####Selecting Columns
@@ -76,33 +64,77 @@ This is where things get more interesting.
 head(flights[, arr_delay]) #returns the column as a vector
 flights[, .(arr_delay, dep_delay)] #.() is an alias for list(), returns a data table
 flights[, .(delayed_arrival = arr_delay, delpayed_depart = dep_delay)] #print with new names
+flights[, .(delayed_arrival_mean = mean(arr_delay), delpayed_depart_mean = mean(dep_delay))]
 ```
 
 ####Calculations and Assigning New Variables
 ```{r}
 flights[carrier == "AA", sum(air_time)]
-flights[, totalDelay := dep_delay + arr_delay] #doesn't print anything
+flights[, totalDelay := dep_delay + arr_delay] #assigns a new variable, doesn't print anything
+head(flights)
+
+flights[month == 1 & flight == 3, origin := "Becca"] #reassigns the 'origin' variable
+head(flights[month == 1 & flight == 3])
+
+flights[, `:=`(dep_time = dep_time + 1, sdDelay = sd(totalDelay))] #assign multiple variables at a time
+head(flights)
+
+flights[, resids := residuals(lm(totalDelay ~ 1))]
 head(flights)
 ```
 
-####Summarizing
+
+<img src="images/by.png" height="800px" width="1000px" />
+
+####Grouping
 ```{r}
-
+flights[carrier == "AA", .(avg_dep_delay = mean(dep_delay)), by = dest]
 ```
 
+####Joining
 
-```{r fig.width=12, fig.height=4,echo=FALSE}
-img <- readPNG("images/by.png")
-grid.raster(img)
-```
+####Handy Functions
 
+**setkey()** orders your data table by that variable. I often use this when working with longitudinal data to make sure the table is in chronologic order, but you can order by anything.
 ```{r}
-
+setkey(flights, day, month, year)
+key(flights)
 ```
+
+**setnames()** change names of variables
+```{r}
+setnames(flights, c("year", "month"), c("Yr", "Mo"))
+head(names(flights))
+```
+
+**.N** counts the rows of a data table, for use in i or j
+```{r}
+flights[, .N, by = carrier] #count the number of observations for each carrier
+flights[sample(.N, 5)] # randomly sample 5 rows
+```
+
+**.I** equivalent to seq_len(nrow(x))
+```{r}
+flights[, index := .I, by = carrier] #create an index in each carrier
+head(flights[carrier == "AA"])
+head(flights[carrier == "AS"])
+```
+
+**.SD** specifies multiple columns in j
+```{r}
+facs <- c("carrier", "origin", "dest") 
+
+flights[, .SD, .SDcols = facs]
+flights[, (facs) := lapply(.SD, factor), .SDcols = facs]
+```
+
 
 <br>
 
 ##Other Resources
-Check out the [Github page](https://github.com/Rdatatable/data.table/wiki) for lots more information.
-
+Data.table [Github page](https://github.com/Rdatatable/data.table/wiki) for lots more information
+<br>
+Data Camp [intro](https://www.datacamp.com/community/tutorials/data-table-r-tutorial) and tutorial by Matt.
+<br>
+[Tagged questions](https://stackoverflow.com/questions/tagged/data.table) on Stack Overflow about data.table
 
