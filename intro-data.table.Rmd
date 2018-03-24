@@ -1,37 +1,108 @@
 ---
-title: "intro-data.table"
+title: "intro to data.table"
 author: "Becca Freese"
 date: "4/2/2018"
-output: html_document
+output:
+  html_document:
+    css: style.css
 editor_options: 
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = FALSE, warning=FALSE, message=FALSE}
+library(emo)
+library(ggplot2)
+library(lubridate)
 ```
 
+<br>
 
 ##Introduction
-This is a basic overview of the data.table package in R. My goal is to intruduce you to what data.table has to offer. This is not a comparison with dylyr, you can google that stuff if you want.
+The <span style="color:CRIMSON">data.table</span> package for R is the brainchild of two heavy data users in R, one (Matt Dowle) from the financial industry, and one (Arun Srinivasan) from genomics. Both using large amounts of data, and finding ways to code things to go faster and more efficiently.
 
-Authored by Matt Dowle and Arun Srinivasan, first introdued in 2006, to be quicker and more efficient than other methods.
+<br>
+A data.table is like data.frame *plus*. In fact it is also a data.frame, meaning whatever code you use on a data.frame (including dplyr or other tidyverse code) works fine on data.table objects.
+
+<br>
+I am not going to discuss the differences between data.table and dplyr or try to convince you one is better than the other. To learn more about that, click [here](https://stackoverflow.com/questions/21435339/data-table-vs-dplyr-can-one-do-something-well-the-other-cant-or-does-poorly/27840349#27840349), [here](https://www.r-statistics.com/2013/09/a-speed-test-comparison-of-plyr-data-table-and-dplyr/), or google it. `r emo::ji("smile")`
+
+Some of the following examples come from [here](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html).
 
 ##Getting Started
 
-![](images/structure.png)
-
-```{r}
+####Setting a data.table
+```{r, message=FALSE, warning=FALSE}
 library(data.table)
+data(iris)
+iris <- setDT(iris) #changes a data.frame to a data.table
+class(iris)
+```
+Another option is to read in your csv file with <span style="color:CRIMSON">fread()</span>, which stands for 'fast read' and is similar to read.table or read.csv, or you can use it to read a text file off the internet!
+```{r, cache = TRUE}
+flights <- fread("https://raw.githubusercontent.com/wiki/arunsrinivasan/flights/NYCflights14/flights14.csv")
+flights
+```
 
-DT <- data.table(x = 1:5,
-                 y = c("a", "b", "a", "b", "c"),
-                 z = c(42, 23, 35, 64, 23))
-str(DT)
+<br>
+
+####Using a data.table
+The overarching concept of data.table is “i, j, by.”
+```{r fig.width=12, fig.height=10,echo=FALSE}
+library(png)
+library(grid)
+img <- readPNG("images/structure.png")
+grid.raster(img)
+```
+
+```{r fig.width=12, fig.height=4,echo=FALSE}
+img <- readPNG("images/i.png")
+grid.raster(img)
+```
+
+```{r, message = FALSE, warning = FALSE, error = FALSE}
+flights[carrier == "AA" & origin == "JFK"] #print all flights with AA and had origin of JFK
+ggplot(flights[carrier == "AA"], aes(x = distance)) + geom_histogram() + theme_bw()
 ```
 
 
+```{r fig.width=12, fig.height=4,echo=FALSE}
+img <- readPNG("images/j.png")
+grid.raster(img)
+```
+This is where things get more interesting.
+
+#####Selecting Columns
+```{r}
+head(flights[, arr_delay]) #returns the column as a vector
+flights[, .(arr_delay, dep_delay)] #.() is an alias for list(), returns a data table
+flights[, .(delayed_arrival = arr_delay, delpayed_depart = dep_delay)] #print with new names
+```
+
+####Calculations and Assigning New Variables
+```{r}
+flights[carrier == "AA", sum(air_time)]
+flights[, totalDelay := dep_delay + arr_delay] #doesn't print anything
+head(flights)
+```
+
+####Summarizing
+```{r}
+
+```
+
+
+```{r fig.width=12, fig.height=4,echo=FALSE}
+img <- readPNG("images/by.png")
+grid.raster(img)
+```
+
+```{r}
+
+```
+
+<br>
+
 ##Other Resources
-Check out the [Github page](https://github.com/Rdatatable/data.table/wiki) for lots of more information.
+Check out the [Github page](https://github.com/Rdatatable/data.table/wiki) for lots more information.
 
 
