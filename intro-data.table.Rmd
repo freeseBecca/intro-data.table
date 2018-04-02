@@ -97,7 +97,6 @@ flights[, resids := residuals(lm(totalDelay ~ 1))]
 head(flights)
 ```
 
-
 <img src="images/by.png" height="800px" width="1000px" />
 
 ####Grouping
@@ -129,6 +128,13 @@ setnames(flights, c("year", "month"), c("Yr", "Mo"))
 head(names(flights))
 ```
 
+**setkey()** orders a data.table by a variable
+```{r}
+setkey(flights, year, month, day)
+setkey(X, color)
+X 
+```
+
 **.N** counts the rows of a data table, for use in i or j
 ```{r}
 flights[, .N] #same as nrow(flights)
@@ -153,7 +159,6 @@ DT[-first_x[, V1]] #get everything but the first occurance of each group by x
 facs <- c("carrier", "origin", "dest") 
 flights[, (facs) := lapply(.SD, factor), .SDcols = facs]
 ```
-
 
 <br>
 
