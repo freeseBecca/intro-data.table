@@ -1,9 +1,11 @@
 ---
-title: "intro to data.table"
-author: "Becca Freese"
+title: "Intro to data.table"
+author: "Becca Freese frees048@umn.edu"
 date: "4/2/2018"
 output:
-  html_document:
+  prettydoc::html_pretty:
+    theme: hpstr
+    highlight: github
     css: style.css
 editor_options: 
   chunk_output_type: console
@@ -13,6 +15,7 @@ editor_options:
 library(emo)
 library(ggplot2)
 library(lubridate)
+library(prettydoc)
 ```
 
 <br>
@@ -26,6 +29,10 @@ A data.table is like data.frame *plus*. In fact it is also a data.frame, meaning
 <br>
 I am not going to discuss the differences between data.table and dplyr or try to convince you one is better than the other. To learn more about that, click [here](https://stackoverflow.com/questions/21435339/data-table-vs-dplyr-can-one-do-something-well-the-other-cant-or-does-poorly/27840349#27840349), [here](https://www.r-statistics.com/2013/09/a-speed-test-comparison-of-plyr-data-table-and-dplyr/), or google it. `r emo::ji("smile")`
 
+<br>
+One notable difference with data.table is that column definitions or modifications and calculations are made using assignment by reference. In the internals of R, when a new column is made (for instance with mutate from dplyr), the entire table is copied to add it. This can be expensive from a memory (and thus speed) perspective when R is working with larger files. Instead, the data.table approach is to make a reference which is similar to an index, which tells R how to calculate the field when it is needed, rather than make a copy of the table to have it immediately available.
+
+<br>
 Some of the following examples come from [here](https://cran.r-project.org/web/packages/data.table/vignettes/datatable-intro.html).
 
 ##Getting Started
@@ -38,6 +45,8 @@ iris <- setDT(iris) #changes a data.frame to a data.table
 class(iris)
 ```
 Another option is to read in your csv file with <span style="color:CRIMSON">fread()</span>, which stands for 'fast read' and is similar to read.table or read.csv, or you can use it to read a text file off the internet!
+Here's a [csv](https://raw.githubusercontent.com/wiki/arunsrinivasan/flights/NYCflights14/flights14.csv) file living on the interwebs.
+
 ```{r, cache = TRUE}
 flights <- fread("https://raw.githubusercontent.com/wiki/arunsrinivasan/flights/NYCflights14/flights14.csv")
 flights
@@ -52,7 +61,8 @@ The overarching concept of data.table is “i, j, by.”
 <img src="images/i.png" height="800px" width="1000px" />
 ```{r, message = FALSE, warning = FALSE, error = FALSE}
 flights[carrier == "AA" & origin == "JFK"] #print all flights with AA and had origin of JFK
-ggplot(flights[carrier == "AA"], aes(x = distance)) + geom_histogram() + theme_bw()
+ggplot(flights[carrier == "AA"], aes(x = distance)) +
+  geom_histogram() + theme_bw()
 ```
 
 
@@ -63,8 +73,11 @@ This is where things get more interesting.
 ```{r}
 head(flights[, arr_delay]) #returns the column as a vector
 flights[, .(arr_delay, dep_delay)] #.() is an alias for list(), returns a data table
-flights[, .(delayed_arrival = arr_delay, delpayed_depart = dep_delay)] #print with new names
-flights[, .(delayed_arrival_mean = mean(arr_delay), delpayed_depart_mean = mean(dep_delay))]
+flights[, .(delayed_arrival = arr_delay,
+            delayed_depart = dep_delay)] #print with new names
+
+flights[, .(delayed_arrival_mean = mean(arr_delay),
+            delayed_depart_mean = mean(dep_delay))] #summarize the DT, include new names
 ```
 
 ####Calculations and Assigning New Variables
@@ -76,7 +89,8 @@ head(flights)
 flights[month == 1 & flight == 3, origin := "Becca"] #reassigns the 'origin' variable
 head(flights[month == 1 & flight == 3])
 
-flights[, `:=`(dep_time = dep_time + 1, sdDelay = sd(totalDelay))] #assign multiple variables at a time
+flights[, `:=`(dep_time = dep_time + 1,
+               sdDelay = sd(totalDelay))] #assign multiple variables at a time
 head(flights)
 
 flights[, resids := residuals(lm(totalDelay ~ 1))]
@@ -92,14 +106,22 @@ flights[carrier == "AA", .(avg_dep_delay = mean(dep_delay)), by = dest]
 ```
 
 ####Joining
+As we've seen, *i* can be a filtering statement, but it can also be another data.table we can merge with. The following table comes from [here](https://rstudio-pubs-static.s3.amazonaws.com/52230_5ae0d25125b544caab32f75f0360e775.html) and summarizes different joins and their syntax.
+<img src="images/join.png" height="800px" width="1000px"/>
 
-####Handy Functions
-
-**setkey()** orders your data table by that variable. I often use this when working with longitudinal data to make sure the table is in chronologic order, but you can order by anything.
 ```{r}
-setkey(flights, day, month, year)
-key(flights)
+X <- data.table(ID = c(1:10), color = rep(c("red", "blue"), times = 5))
+X 
+Y <- data.table(ID = c(3, 4, 12, 5, 30), z = c(45, 23, 6, 43, 23))
+Y
+
+X[Y, on = "ID"] #right outer join
+Y[X, on = "ID"] #left outer join
+
+Y[X, on = "ID", nomatch = 0] #inner join
 ```
+
+<img src="images/hf.png" height="800px" width="1000px"/>
 
 **setnames()** change names of variables
 ```{r}
@@ -109,22 +131,26 @@ head(names(flights))
 
 **.N** counts the rows of a data table, for use in i or j
 ```{r}
-flights[, .N, by = carrier] #count the number of observations for each carrier
-flights[sample(.N, 5)] # randomly sample 5 rows
+flights[, .N] #same as nrow(flights)
+flights[, .N, by = carrier] #count the number of rows for each carrier
+flights[sample(.N, 5)] # randomly sample 5 rows 
 ```
 
 **.I** equivalent to seq_len(nrow(x))
 ```{r}
-flights[, index := .I, by = carrier] #create an index in each carrier
-head(flights[carrier == "AA"])
-head(flights[carrier == "AS"])
+DT <- data.table(x = c(sample(LETTERS[1:5], 10, TRUE), "A"),
+                 num = round(rnorm(11, 20, 5), digits = 2),
+                 key = "x")
+DT
+first_x <- DT[, .I[1], by=x] #find the first occurance by some group
+first_x
+
+DT[-first_x[, V1]] #get everything but the first occurance of each group by x
 ```
 
-**.SD** specifies multiple columns in j
+**.SD** **S**ubset of x's **D**ata for each group. Here's a [stackoverflow answer](https://stackoverflow.com/questions/8508482/what-does-sd-stand-for-in-data-table-in-r?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa) with a good explanation.
 ```{r}
 facs <- c("carrier", "origin", "dest") 
-
-flights[, .SD, .SDcols = facs]
 flights[, (facs) := lapply(.SD, factor), .SDcols = facs]
 ```
 
@@ -132,9 +158,11 @@ flights[, (facs) := lapply(.SD, factor), .SDcols = facs]
 <br>
 
 ##Other Resources
-Data.table [Github page](https://github.com/Rdatatable/data.table/wiki) for lots more information
+Data.table [Github page](https://github.com/Rdatatable/data.table/wiki) for more information
 <br>
 Data Camp [intro](https://www.datacamp.com/community/tutorials/data-table-r-tutorial) and tutorial by Matt.
 <br>
 [Tagged questions](https://stackoverflow.com/questions/tagged/data.table) on Stack Overflow about data.table
+<br>
+
 
