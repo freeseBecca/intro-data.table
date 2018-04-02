@@ -1,6 +1,9 @@
 ---
 title: "Intro to data.table"
-author: "Becca Freese frees048@umn.edu"
+author:
+- Becca Freese
+- frees048@umn.edu
+- https://github.com/freeseBecca/intro-data.table
 date: "4/2/2018"
 output:
   prettydoc::html_pretty:
@@ -10,6 +13,10 @@ output:
 editor_options: 
   chunk_output_type: console
 ---
+
+author:
+- Author One
+- Author Two
 
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
 library(emo)
