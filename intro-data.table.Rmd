@@ -101,7 +101,7 @@ head(flights)
 Using a function that outputs more than one value in j
 ```{r, eval = FALSE}
 data[, HOME_ADDRESS :=  paste0(addrLine02, ", ", addrLine03, ", USA")]
-data[, c('lat', "lon") := geocode(HOME_ADDRESS)]
+data[, c('lon', "lat") := geocode(HOME_ADDRESS)]
 ```
 
 <img src="images/by.png" height="800px" width="1000px" />
