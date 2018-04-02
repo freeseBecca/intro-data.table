@@ -1,6 +1,9 @@
 ---
 title: "Intro to data.table"
-author: "Becca Freese frees048@umn.edu"
+author:
+- Becca Freese
+- frees048@umn.edu
+- https://github.com/freeseBecca/intro-data.table
 date: "4/2/2018"
 output:
   prettydoc::html_pretty:
