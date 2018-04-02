@@ -14,10 +14,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-author:
-- Author One
-- Author Two
-
 ```{r, include = FALSE, warning=FALSE, message=FALSE}
 library(emo)
 library(ggplot2)
