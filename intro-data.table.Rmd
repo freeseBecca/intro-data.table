@@ -130,6 +130,7 @@ head(names(flights))
 
 **setkey()** orders a data.table by a variable
 ```{r}
+key(flights)
 setkey(flights, year, month, day)
 setkey(X, color)
 X 
