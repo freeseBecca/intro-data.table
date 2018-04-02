@@ -78,11 +78,12 @@ flights[, .(delayed_arrival = arr_delay,
 
 flights[, .(delayed_arrival_mean = mean(arr_delay),
             delayed_depart_mean = mean(dep_delay))] #summarize the DT, include new names
+
+flights[carrier == "AA", sum(air_time)] #combining i and j
 ```
 
 ####Calculations and Assigning New Variables
 ```{r}
-flights[carrier == "AA", sum(air_time)]
 flights[, totalDelay := dep_delay + arr_delay] #assigns a new variable, doesn't print anything
 head(flights)
 
